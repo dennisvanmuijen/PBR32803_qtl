@@ -29,7 +29,17 @@ shinyUI(
                )
              )
     ),
-       tabPanel(div(h4("About")),
+    tabPanel(div(h4("Data exploration")),
+             tabsetPanel(
+               tabPanel("Genetic Map",
+    sidebarPanel(print("Hello World")),
+    wellPanel(
+      ggiraphOutput("distPlot",width="100%", height="400px")
+    )
+               )
+             )
+    ),
+    tabPanel(div(h4("About")),
              mainPanel(
                includeMarkdown("about.Rmd")
              )

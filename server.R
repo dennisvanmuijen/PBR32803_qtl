@@ -89,6 +89,22 @@ output$raw_plot <- renderggiraph({
   }
   })
 
+#######################
+####QTL visualisation##
+#######################
+
+output$distPlot <- renderggiraph({
+  plotdata <- scanone(geno(), pheno.col = 1)
+  
+  p <- ggplot(plotdata, aes(x=pos, y=lod, tooltip = lod))+
+    geom_line()+geom_rug(sides = "b")+
+    geom_point_interactive(color="orange",size=0.1)+
+    theme_dark() +
+    facet_wrap(~chr)
+  return(ggiraph(code = {print(p)},zoom_max = 2))
+})
+
+
 
 ########################
 #####Export results ####
