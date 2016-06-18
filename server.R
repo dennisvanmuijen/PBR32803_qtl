@@ -1,13 +1,24 @@
 library(shiny)
 shinyServer(function(input, output, session) {
-    ##################################
+  ##################################
   ###### Upload data
   ##################################
   output$poptype <- renderUI({
-      selectInput("poptype", label = "Cross type",
-                  choices = c("F2","RIL","DH"),
-                  selected = 1)
+      selectInput("ngen", label = "F Generation",
+                  choices = 2:10,
+                  selected = 2)
   })
+  
+  output$pheno <- renderUI({
+    selectInput("phenosel", label = "F Generation",
+                choices = geno()$pheno %>% names)
+  })
+  
+  output$estmap <- renderUI({
+    checkboxInput("mapest", label = "Estimate map",
+                value = TRUE)
+  })
+  
   
     geno <- reactive({
     inFile <- input$file1
@@ -15,39 +26,17 @@ shinyServer(function(input, output, session) {
       need(input$file1 != "", "Upload a cross file to begin")
       # need(input$poptype != "", "Upload a cross file to begin")
     )
-    if(input$poptype == "F2"){
       cross <- read.cross(
         format = "csv",
         file = inFile$datapath,
         genotypes = c("A","H","B"),
         alleles = c("A","B"),
-        estimate.map = TRUE
+        estimate.map = TRUE,
+        F.gen = input$ngen %>% as.numeric,
+        BC.gen = 0
       )
+      cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
       return(cross)
-    } 
-    if(input$poptype == "DH"){
-      cross <- read.cross(
-        format = "csv",
-        file = inFile$datapath,
-        genotypes = c("A","B"),
-        alleles = c("A","B"),
-        estimate.map = TRUE
-      )
-      return(cross)
-    } 
-    if(input$poptype == "RIL"){
-      cross <- read.cross(
-        format = "csv",
-        file = inFile$datapath,
-        genotypes = c("A","H","B"),
-        alleles = c("A","B"),
-        BC.gen = 0,
-        F.gen = 6,
-        estimate.map = TRUE
-      )
-      cross <- cross %>% convert2riself()
-      return(cross)
-    } 
   })
   
   output$inputSummary <- renderPrint({
@@ -57,6 +46,45 @@ shinyServer(function(input, output, session) {
     summary(geno())
   })
   
+  
+###############################
+###### Interval mapping
+IMapping <- reactive({
+  out.s1perm <- scanone(geno(), pheno.col = 1, n.perm = 50, n.cluster = 4)
+  out.s1  <- scanone(geno(), pheno.col = 1)###############################
+  thrs <- summary(out.s1perm , alpha=c(0.05, 0.01))
+  # QTL detect at alpha = 0.05
+  res <- summary(out.s1, perms=out.s1perm, alpha=0.05)
+  if(dim(res)[1] != 0){
+  mqtl <- makeqtl(geno(),res[,1], res[,2], what="prob")
+  QTLnames <- unlist(mqtl$altname)
+  form <- paste(QTLnames, collapse="+")
+  form <- paste("y~",form, sep="")
+  fit <- fitqtl(geno(), pheno.col = 1, qtl = mqtl, method = "hk", model = "normal",
+                formula = form, get.ests = T)
+  estimate.out <- summary(fit)
+  mylist <- list()
+  mylist[[1]] <- out.s1
+  mylist[[2]] <- thrs
+  mylist[[3]] <- estimate.out
+  } 
+  if(dim(res)[1] == 0){
+  mylist <- list()
+  mylist[[1]] <- 0
+  mylist[[2]] <- 0
+  mylist[[3]] <- 0
+}
+  return(mylist)
+})
+
+output$IMsummary <- renderPrint({
+  validate(
+    need(input$file1 != "", "Upload a cross file to begin"),
+    need(IMapping()[[1]] != 0, "No QTL detected")
+  )
+  IMapping()[[3]]
+})
+
 ###############################
 ###### Data exploration
 ###############################
@@ -64,7 +92,8 @@ shinyServer(function(input, output, session) {
 ## Plot of raw data
 output$raw_plot <- renderggiraph({
   validate(
-    need(input$file1 != "", "Upload a cross file to begin")
+    need(input$file1 != "", "Upload a cross file to begin"),
+    need(IMapping()[[1]] != 0, "No QTL detected")
   )
   if(input$mapactivator == 0){
   mymap <- pull.map(geno(), as.table = T)
@@ -92,13 +121,19 @@ output$raw_plot <- renderggiraph({
 #######################
 
 output$distPlot <- renderggiraph({
-  plotdata <- scanone(geno(), pheno.col = 1)
-  
+  validate(
+    need(input$file1 != "", "Upload a cross file to begin"),
+    need(IMapping()[[1]] != 0, "No QTL detected")
+  )
+  plotdata <- IMapping()[[1]]
+  thr <- IMapping()[[2]]
   p <- ggplot(plotdata, aes(x=pos, y=lod, tooltip = lod))+
     geom_line()+geom_rug(sides = "b")+
     geom_point_interactive(color="orange",size=0.1)+
-    theme_dark() +
-    facet_wrap(~chr)
+    theme_dark(base_size = 20) +
+    facet_wrap(~chr) + 
+    geom_hline(yintercept = thr[1], lwd = 1.4, lty = 2, col = "white") +
+    geom_hline(yintercept = thr[2], lwd = 1.2, lty = 2, col = "orange")
   return(ggiraph(code = {print(p)},zoom_max = 2))
 })
 

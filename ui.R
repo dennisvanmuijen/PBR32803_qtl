@@ -1,11 +1,16 @@
 library(shiny)
 shinyUI(
   navbarPage("", inverse = TRUE, theme = shinytheme("cerulean"),
-    tabPanel(div(h4("Upload data")),
+    tabPanel(div(h4("Interval Mapping")),
           sidebarLayout(
            sidebarPanel(
              uiOutput("poptype"),
-                 fileInput('file1', 'Choose file to upload',
+             br(),
+             uiOutput("estmap"),
+             br(),
+             uiOutput("pheno"),      
+             br(), 
+             fileInput('file1', 'Choose file to upload',
                     accept = c(
                       'text/csv',
                       'text/comma-separated-values',
@@ -16,29 +21,41 @@ shinyUI(
                     )
                     )),
             mainPanel(
-              verbatimTextOutput(outputId = "inputSummary")
-                    )
+              tabPanel("Interval mapping",
+                  tabsetPanel("IM",
+                        tabPanel("Input summary",
+                          verbatimTextOutput(outputId = "inputSummary")
+                          ),
+                        tabPanel("LOD Profile",
+                           ggiraphOutput("distPlot",width="100%", height="400px")
+                        ),
+                        tabPanel("Fit qtl",
+                                 verbatimTextOutput(outputId = "IMsummary")
+                        )
+                       )
+              )
+            )
           )
       ),
-    tabPanel(div(h4("Data exploration")),
-             tabsetPanel(
-              tabPanel("Genetic Map",
-               wellPanel(
-               ggiraphOutput('raw_plot', width = "100%", height = "600px")
-               )
-               )
-             )
-    ),
-    tabPanel(div(h4("Data exploration")),
-             tabsetPanel(
-               tabPanel("Genetic Map",
-    sidebarPanel(print("Hello World")),
-    wellPanel(
-      ggiraphOutput("distPlot",width="100%", height="400px")
-    )
-               )
-             )
-    ),
+    # tabPanel(div(h4("Data exploration")),
+    #          tabsetPanel(
+    #           tabPanel("Genetic Map",
+    #            wellPanel(
+    #            ggiraphOutput('raw_plot', width = "100%", height = "600px")
+    #            )
+    #            )
+    #          )
+    # ),
+    # tabPanel(div(h4("Data exploration")),
+    #          tabsetPanel(
+    #            tabPanel("Genetic Map",
+    # sidebarPanel(print("Hello World")),
+    # wellPanel(
+    #   ggiraphOutput("distPlot",width="100%", height="400px")
+    # )
+    #            )
+    #          )
+    # ),
     tabPanel(div(h4("About")),
              mainPanel(
                includeMarkdown("about.Rmd")
