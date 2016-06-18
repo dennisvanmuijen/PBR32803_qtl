@@ -6,10 +6,9 @@ shinyUI(
            sidebarPanel(
              uiOutput("poptype"),
              br(),
-             uiOutput("estmap"),
-             br(),
-             uiOutput("pheno"),      
-             br(), 
+             # uiOutput("estmap"),
+             # br(),
+
              fileInput('file1', 'Choose file to upload',
                     accept = c(
                       'text/csv',
@@ -19,7 +18,12 @@ shinyUI(
                       '.csv',
                       '.tsv'
                     )
-                    )),
+                    ),
+             uiOutput("pheno"),      
+             br(),
+             h4("Select chromosome"),
+             uiOutput("chromSelect")
+             ),
             mainPanel(
               tabPanel("Interval mapping",
                   tabsetPanel("IM",
@@ -27,7 +31,7 @@ shinyUI(
                           verbatimTextOutput(outputId = "inputSummary")
                           ),
                         tabPanel("LOD Profile",
-                           ggiraphOutput("distPlot",width="100%", height="400px")
+                           ggiraphOutput("distPlot",width="100%", height="800px")
                         ),
                         tabPanel("Fit qtl",
                                  verbatimTextOutput(outputId = "IMsummary")
