@@ -10,8 +10,7 @@ shinyServer(function(input, output, session) {
                   selected = 1)
   })
   
-  
-  geno <- reactive({
+    geno <- reactive({
     inFile <- input$file1
     validate(
       need(input$file1 != "", "Upload a cross file to begin")
