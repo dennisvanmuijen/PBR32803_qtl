@@ -1,7 +1,6 @@
 library(shiny)
 shinyServer(function(input, output, session) {
-  
-  ##################################
+    ##################################
   ###### Upload data
   ##################################
   output$poptype <- renderUI({
