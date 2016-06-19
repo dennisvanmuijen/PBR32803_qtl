@@ -68,7 +68,7 @@ shinyServer(function(input, output, session) {
 ###############################
 ###### Interval mapping
 IMapping <- reactive({
-  out.s1perm <- scanone(geno(), pheno.col = input$phenosel, n.perm = 50, n.cluster = 4, method = "hk")
+  out.s1perm <- scanone(geno(), pheno.col = input$phenosel, n.perm = 1000, n.cluster = 4, method = "hk")
   out.s1  <- scanone(geno(), pheno.col = input$phenosel, method = "hk")###############################
   thrs <- summary(out.s1perm , alpha=c(0.05, 0.01))
   # QTL detect at alpha = 0.05
