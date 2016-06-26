@@ -9,26 +9,22 @@ shinyServer(function(input, output, session) {
                   selected = 2)
   })
   
+  
+
   output$chromSelect <- renderUI({
-    #     if(input$mapactivator == 0){
     selectizeInput(inputId="chromSelect", 
                    label = "Select Chromosome", 
                    choices = names(geno()$geno),
                    multiple = TRUE,
                    selected =  names(geno()$geno)
     )
-    #     } else {
-    #       selectizeInput(inputId="chromSelect",
-    #                      label = "Select Chromosome",
-    #                      choices = names(mstresult()$geno)
-    #       )
-    #     }
   })  
   
   
   output$pheno <- renderUI({
     selectInput("phenosel", label = "Select Phenotype",
-                choices = geno()$pheno %>% names)
+                choices = geno()$pheno %>% names
+                )
   })
   
   # output$estmap <- renderUI({
@@ -144,15 +140,17 @@ output$distPlot <- renderggiraph({
     need(IMapping()[[1]] != 0, "No QTL detected")
   )
   plotdata <- IMapping()[[1]]
+  plotdata$data_id <- tolower(row.names(plotdata))
+  plotdata$tooltip <- row.names(plotdata)
   thr <- IMapping()[[2]]
-    p <- ggplot(plotdata[which(plotdata$chr%in%input$chromSelect),], aes(x=pos, y=lod, tooltip = lod))+
-      geom_line()+geom_rug(sides = "b")+
-      facet_wrap(~chr, nrow=3)+
-      geom_point_interactive(color="orange",size=0.5)+
+  plotdata$marker <- row.names(IMapping()[[1]])
+     p <- ggplot(plotdata[which(plotdata$chr%in%input$chromSelect),], aes(x=pos, y=lod, tooltip = tooltip, data_id = data_id))+
+       geom_line(aes(group = 1))+geom_rug(sides = "b")+
+       facet_wrap(~chr, nrow=3)+
+      geom_point_interactive(color="orange", size=0.9)+
       theme_dark() +
       geom_hline(yintercept = thr[1], lwd = 0.5, lty = 2, col = "white") +
       geom_hline(yintercept = thr[2], lwd = 0.5, lty = 2, col = "orange")
-    
     return(ggiraph(code = {print(p)}, zoom_max = 2, tooltip_offx = 20, tooltip_offy = -10, hover_css = "fill:black;stroke-width:1px;stroke:wheat;cursor:pointer;alpha:1;"))
   })
   

@@ -4,8 +4,6 @@ shinyUI(
     tabPanel(div(h4("Interval Mapping")),
           sidebarLayout(
            sidebarPanel(
-             uiOutput("poptype"),
-             br(),
              # uiOutput("estmap"),
              # br(),
 
@@ -19,6 +17,8 @@ shinyUI(
                       '.tsv'
                     )
                     ),
+             uiOutput("poptype"),
+             br(),
              uiOutput("pheno"),      
              br(),
              h4("Select chromosome"),
@@ -31,6 +31,7 @@ shinyUI(
                           verbatimTextOutput(outputId = "inputSummary")
                           ),
                         tabPanel("LOD Profile",
+                                 helpText("Interval mapping - white dashed = 5% signficance level, orange dashed = 1% significance level"),
                            ggiraphOutput("distPlot",width="100%", height="800px")
                         ),
                         tabPanel("Fit qtl",
