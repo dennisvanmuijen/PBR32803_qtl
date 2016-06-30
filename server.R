@@ -132,7 +132,7 @@ output$IMsummary <- renderPrint({
 CIMapping <- reactive({
   validate(
     need(input$file1 != "", "Upload a cross file to begin"),
-    need(input$phenosel2 != "", "One sec please..")
+    need(input$phenosel2 != "", "Loading..")
   )
   if(input$ngen > 5){
     cross <- geno() %>% convert2riself()
