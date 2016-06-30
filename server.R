@@ -12,7 +12,7 @@ shinyServer(function(input, output, session) {
   output$poptype2 <- renderUI({
     selectInput("ngen2", label = "F Generation",
                 choices = 2:10,
-                selected = 2)
+                selected = input$ngen)
   })
 
   output$chromSelect2 <- renderUI({
@@ -23,7 +23,7 @@ shinyServer(function(input, output, session) {
                    selected =  names(geno()$geno)
     )
   })  
-  
+
   output$chromSelect <- renderUI({
     selectizeInput(inputId="chromSelect", 
                    label = "Select Chromosome", 
@@ -41,7 +41,7 @@ shinyServer(function(input, output, session) {
   
   output$pheno2 <- renderUI({
     selectInput("phenosel2", label = "Select Phenotype",
-                choices = geno()$pheno %>% names
+                choices = geno()$pheno %>% names, selected = input$phenosel
     )
   })
   
