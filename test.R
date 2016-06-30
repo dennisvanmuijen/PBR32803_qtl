@@ -1,15 +1,76 @@
 
-
+library(qtl)
+library(dplyr)
 cross <- read.cross(
   format = "csv",
   file = "data/cross_pheno.csv",
   genotypes = c("A","H","B"),
   alleles = c("A","B"),
   estimate.map = TRUE,
-  F.gen = 2,
+  F.gen = 8,
   BC.gen = 0
 )
 cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
+cross <- convert2riself(cross)
+
+
+
+cross <- fill.geno(cross)
+cross <- jittermap(cross)
+cofactors <- mqmautocofactors(cross ,50)	# Set 15 Cofactors
+
+
+
+result <- mqmscan(cross,cofactors, pheno.col = 2)	# Backward model selection
+
+(cross$pheno %>% names)[8]
+phen <- 8
+result <- mqmscan(cross,cofactors, pheno.col = phen)
+s1 <- scanone(cross, pheno.col = phen, method = "hk")
+
+plot(s1, result, col = c("black"," orange"), lty = 1, lwd = 2)
+
+
+mqmres <- mqmgetmodel(result)
+mqmres 
+
+qtl <- makeqtl(cross %>% calc.genoprob(), mqmres$chr, mqmres$pos, what = "prob")
+
+
+phen <- 16
+sw.out <- stepwiseqtl(cross %>% calc.genoprob(), pheno.col = phen, max.qtl = 5, method = "hk", additive.only = T,
+         penalties = 3)
+plot(sw.out)
+summary(sw.out)
+plotLodProfile(sw.out)
+
+
+names(cross$pheno)
+
+
+
+
+
+
+
+
+
+
+qtl <- makeqtl(cross %>% calc.genoprob(), c(5,8,9), c(95,56.3,73.8), what = "prob")
+
+
+fit <- fitqtl(cross, pheno.col = phen, qtl = qtl, formula ="y~Q1+Q2+Q3")
+summary(fit)
+
+
+
+
+fit <- fitqtl(cross, pheno.col = phen, qtl = qtl, formula = paste0("y~",paste(mqmres$altname, collapse = "+")))
+summary(fit)
+
+
+
+
 plot(scanone(cross, pheno.col = 1))
 
 plotdata <- scanone(cross, pheno.col = 1, n.perm = 1000, n.cluster = 4)
