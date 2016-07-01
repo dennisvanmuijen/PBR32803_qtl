@@ -91,7 +91,7 @@ IMapping <- reactive({
     cross <- cross %>% jittermap()
     cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
   }
-  out.s1perm <- scanone(cross, pheno.col = input$phenosel, n.perm = 1000, n.cluster = 4, method = "hk")
+  out.s1perm <- scanone(cross, pheno.col = input$phenosel, n.perm = 5000, n.cluster = 4, method = "hk")
   out.s1  <- scanone(cross, pheno.col = input$phenosel, method = "hk")###############################
   thrs <- summary(out.s1perm , alpha=c(0.05, 0.01))
   # QTL detect at alpha = 0.05
@@ -159,7 +159,7 @@ CIMapping <- reactive({
     cross <- cross %>% jittermap()
     cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
   }
-  out.s1perm <- scanone(cross, pheno.col = input$phenosel2, n.perm = 1000, n.cluster = 4, method = "hk")
+  out.s1perm <- scanone(cross, pheno.col = input$phenosel2, n.perm = 5000, n.cluster = 4, method = "hk")
   out.s1  <- scanone(cross, pheno.col = input$phenosel2, method = "hk")###############################
   thrs <- summary(out.s1perm , alpha=c(0.05, 0.01))
   # QTL detect at alpha = 0.05
