@@ -82,10 +82,13 @@ shinyServer(function(input, output, session) {
 ###### Interval mapping
 IMapping <- reactive({
   if(input$ngen > 5){
-  cross <- geno() %>% convert2riself()
+  # cross <- geno() %>% convert2riself()
+    cross <- geno()
+    cross <- cross %>% jittermap()
   cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
   } else {
     cross <- geno()
+    cross <- cross %>% jittermap()
     cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
   }
   out.s1perm <- scanone(cross, pheno.col = input$phenosel, n.perm = 1000, n.cluster = 4, method = "hk")
@@ -124,7 +127,18 @@ output$IMsummary <- renderPrint({
    IMapping()[[3]]
   })
 
-
+waitlist <- reactive({
+  vals <- c("Counting backwards from infinity",
+                "So, do you come here often?",
+                "Just stalling to simulate activity...",
+                "Waiting for approval from Bill Gates...",
+                "Transporting you into the future one second at a time...",
+                "About your data... I lost it... in a volcano.",
+                "Loading the enchanted bunny...",
+                "Please be patient. The program should finish loading in six to eight weeks.")
+  indexnr <- runif(8,1,8) %>% trunc()
+  vals[indexnr[1]]
+})
 
 ###############################
 ###### Composite Interval mapping
@@ -132,13 +146,17 @@ output$IMsummary <- renderPrint({
 CIMapping <- reactive({
   validate(
     need(input$file1 != "", "Upload a cross file to begin"),
-    need(input$phenosel2 != "", "Loading..")
+    need(input$phenosel2 != "", waitlist()
+         )
   )
   if(input$ngen > 5){
-    cross <- geno() %>% convert2riself()
+    # cross <- geno() %>% convert2riself()
+    cross <- geno()
+    cross <- cross %>% jittermap()
     cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
   } else {
     cross <- geno()
+    cross <- cross %>% jittermap()
     cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
   }
   out.s1perm <- scanone(cross, pheno.col = input$phenosel2, n.perm = 1000, n.cluster = 4, method = "hk")
@@ -213,7 +231,8 @@ output$distPlot <- renderggiraph({
       geom_point_interactive(color="orange", size=0.1)+
       theme_dark() +
       geom_hline(yintercept = thr[1], lwd = 0.5, lty = 2, col = "white") +
-      geom_hline(yintercept = thr[2], lwd = 0.5, lty = 2, col = "orange")
+      geom_hline(yintercept = thr[2], lwd = 0.5, lty = 2, col = "orange") +
+       xlab("Position (cM)") + ylab("LOD")
     return(ggiraph(code = {print(p)}, zoom_max = 2, tooltip_offx = 20, tooltip_offy = -10, hover_css = "fill:black;stroke-width:1px;stroke:wheat;cursor:pointer;alpha:1;"))
   })
   
@@ -246,8 +265,17 @@ output$distPlot2 <- renderggiraph({
     theme_dark() +
     geom_hline(yintercept = thr[1], lwd = 0.5, lty = 2, col = "white") +
     geom_hline(yintercept = thr[2], lwd = 0.5, lty = 2, col = "orange") + 
-    scale_color_manual(values = c("darkred","darkblue"))
+    scale_color_manual(values = c("darkred","darkblue")) +
+    xlab("Position (cM)") + ylab("LOD")
   return(ggiraph(code = {print(p)}, zoom_max = 2, tooltip_offx = 20, tooltip_offy = -10, hover_css = "fill:black;stroke-width:1px;stroke:wheat;cursor:pointer;alpha:1;"))
+})
+
+output$lodthr1 <- renderPrint({
+  cat("LOD threshold at alpha 0.05 = ",IMapping()[[2]][1])
+})
+
+output$lodthr2 <- renderPrint({
+  cat("LOD threshold at alpha 0.05 = ",CIMapping()[[2]][1])
 })
 
 output$save <- renderUI({

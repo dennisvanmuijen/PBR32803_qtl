@@ -32,7 +32,8 @@ shinyUI(
                           ),
                         tabPanel("LOD Profile",
                                  helpText("Interval mapping - white dashed = 5% genome-wide signficance level, orange dashed = 1% genome-wide significance level"),
-                           ggiraphOutput("distPlot",width="100%", height="800px")
+                                 verbatimTextOutput(outputId = "lodthr1"),
+                                 ggiraphOutput("distPlot",width="100%", height="800px")
                         ),
                         tabPanel("Fit qtl",
                                  verbatimTextOutput(outputId = "IMsummary")
@@ -57,6 +58,7 @@ shinyUI(
                           tabsetPanel("CIM",
                                       tabPanel("LOD Profile CIM",
                                                helpText("Composite Interval mapping - white dashed = 5% signficance level, orange dashed = 1% significance level"),
+                                               verbatimTextOutput(outputId = "lodthr2"),
                                                ggiraphOutput("distPlot2",width="100%", height="800px")
                                       ),
                                       tabPanel("Fitted qtl",
