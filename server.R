@@ -227,7 +227,7 @@ output$distPlot <- renderggiraph({
   plotdata$marker <- row.names(IMapping()[[1]])
      p <- ggplot(plotdata[which(plotdata$chr%in%input$chromSelect),], aes(x=pos, y=lod, tooltip = tooltip, data_id = data_id))+
        geom_line(aes(group = 1))+geom_rug(data = plotdata[which(!grepl("loc",plotdata$marker)),], sides = "b")+
-       facet_wrap(~chr, nrow=3)+
+       facet_wrap(~chr, nrow=3, scales = "free_x")+
       geom_point_interactive(color="orange", size=0.1)+
       theme_dark() +
       geom_hline(yintercept = thr[1], lwd = 0.5, lty = 2, col = "white") +
@@ -260,14 +260,14 @@ output$distPlot2 <- renderggiraph({
   thr <- CIMapping()[[2]]
   p <- ggplot(plotdata[which(plotdata$chr%in%input$chromSelect),], aes(x=pos, y=lod, colour = method, tooltip = tooltip, data_id = data_id, group = method))+
     geom_line()+geom_rug(data = plotdata[which(!grepl("loc",plotdata$marker)),], sides = "b")+
-    facet_wrap(~chr, nrow=3)+
+    facet_wrap(~chr, nrow=3, scales = "free_x")+
     geom_point_interactive(color="black", size=0.05, alpha = 1)+
     theme_dark() +
     geom_hline(yintercept = thr[1], lwd = 0.5, lty = 2, col = "white") +
     geom_hline(yintercept = thr[2], lwd = 0.5, lty = 2, col = "orange") + 
     scale_color_manual(values = c("darkred","darkblue")) +
     xlab("Position (cM)") + ylab("LOD")
-  return(ggiraph(code = {print(p)}, zoom_max = 2, tooltip_offx = 20, tooltip_offy = -10, hover_css = "fill:black;stroke-width:1px;stroke:wheat;cursor:pointer;alpha:1;"))
+  return(ggiraph(code = {print(p)}, width =12, height = 6,zoom_max = 2, tooltip_offx = 20, tooltip_offy = -10, hover_css = "fill:black;stroke-width:1px;stroke:wheat;cursor:pointer;alpha:1;"))
 })
 
 output$lodthr1 <- renderPrint({

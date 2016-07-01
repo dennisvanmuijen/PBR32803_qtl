@@ -3,131 +3,71 @@ library(qtl)
 library(dplyr)
 cross <- read.cross(
   format = "csv",
-  file = "data/cross_pheno.csv",
+  file = "data/WageningenWeek.csv",
   genotypes = c("A","H","B"),
   alleles = c("A","B"),
   estimate.map = TRUE,
-  F.gen = 8,
+  F.gen = 7,
   BC.gen = 0
 )
-cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
 cross <- convert2riself(cross)
+cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
 
 
 
-cross <- fill.geno(cross)
-cross <- jittermap(cross)
-cofactors <- mqmautocofactors(cross ,50)	# Set 15 Cofactors
+names(cross$pheno)[44]
+
+ptm <- proc.time()
+out.s1perm <- scanone(cross, pheno.col = 44, n.perm = 5000, n.cluster = 3, method = "hk")
+proc.time() - ptm
+summary(out.s1perm, alpha = c(0.05,0.01))
+out.s1perm <- scanone(cross, pheno.col = 44, n.perm = 5000, n.cluster = 3, method = "hk")
+
+out.s1 <- scanone(cross, pheno.col = 44, method = "hk")
+
+
+plotdata <- out.s1
+plotdata$data_id <- tolower(row.names(plotdata))
+plotdata$tooltip <- row.names(plotdata)
+thr <- summary(out.s1perm, alpha = c(0.05,0.01))
+
+plotdata$marker <- row.names(plotdata)
+library(ggplot2)
+p <- ggplot(plotdata, aes(x=pos, y=lod)) +
+  geom_line(aes(group = 1))+geom_rug(data = plotdata[which(!grepl("loc",plotdata$marker)),], sides = "b")+
+  facet_wrap(~chr, nrow=3)+
+  geom_point(color="orange", size=0.1)+
+  theme_dark() +
+  geom_hline(yintercept = thr[1], lwd = 0.5, lty = 2, col = "white") +
+  geom_hline(yintercept = thr[2], lwd = 0.5, lty = 2, col = "orange") + 
+  # geom_text(aes( 0, thr[1], label = thr[1], vjust = -1), size = 3)
+  geom_text(aes(x, y, label=lab),
+            data=data.frame(x=10, y=Inf, lab=rep(thr[1],18) %>% round(digits = 2)), vjust=1)
+
+p
+
+
+cross <- cross %>% jittermap 
+cross <- cross %>% calc.genoprob()
+out.s1perm <- scanone(cross, pheno.col = 19, n.perm = 1000, n.cluster = 3, method = "hk")
+
+out.s1 <- scanone(cross, pheno.col = 19, method = "hk")
+res2 <- summary(out.s1, perms=out.s1perm, alpha=0.05)
 
 
 
-result <- mqmscan(cross,cofactors, pheno.col = 2)	# Backward model selection
+# res2 <- summary(out.s2)
+# if(attributes(out.s2)$pLOD != 0){
 
-(cross$pheno %>% names)[8]
-phen <- 8
-result <- mqmscan(cross,cofactors, pheno.col = phen)
-s1 <- scanone(cross, pheno.col = phen, method = "hk")
-
-plot(s1, result, col = c("black"," orange"), lty = 1, lwd = 2)
-
-
-mqmres <- mqmgetmodel(result)
-mqmres 
-
-qtl <- makeqtl(cross %>% calc.genoprob(), mqmres$chr, mqmres$pos, what = "prob")
-
-
-phen <- 16
-sw.out <- stepwiseqtl(cross %>% calc.genoprob(), pheno.col = phen, max.qtl = 5, method = "hk", additive.only = T,
-         penalties = 3)
-plot(sw.out)
-summary(sw.out)
-plotLodProfile(sw.out)
-
-
-names(cross$pheno)
-
-
-
-
-
-
-
-
-
-
-qtl <- makeqtl(cross %>% calc.genoprob(), c(5,8,9), c(95,56.3,73.8), what = "prob")
-
-
-fit <- fitqtl(cross, pheno.col = phen, qtl = qtl, formula ="y~Q1+Q2+Q3")
-summary(fit)
-
-
-
-
-fit <- fitqtl(cross, pheno.col = phen, qtl = qtl, formula = paste0("y~",paste(mqmres$altname, collapse = "+")))
-summary(fit)
-
-
-
-
-plot(scanone(cross, pheno.col = 1))
-
-plotdata <- scanone(cross, pheno.col = 1, n.perm = 1000, n.cluster = 4)
-plotdata2 <- scanone(cross, pheno.col = 1)
-
-summary(plotdata , alpha=c(0.05, 0.10))
-# Results above the 0.05 threshold
-res <- summary(plotdata2, perms=plotdata, alpha=0.5)
-res[1,1]
-res
-
-mqtl
-mqtl <- makeqtl(cross,res[,1], res[,2], what="prob")
-form <- 
-
-fit <- fitqtl(cross, pheno.col = 8, qtl = mqtl, method = "hk", model = "normal",
-              formula = form, get.ests = T)
-summary(fit)
-
-
-names(cross$pheno)
-
-?stepwiseqtl
-
-
-cross <- jittermap(cross)
-cross <- calc.genoprob(cross)
-pens <- c(3.913854, 5.836726, 3.194303 )
-
-
-
-mqtl <- makeqtl(cross,test$chr, test$pos, what="prob")
-
-test <- stepwiseqtl(cross, pheno.col = 9, max.qtl = 3, 
-                    method = "hk", additive.only = F,
-                    penalties = pens)
-attributes(test)$formula
-
-
-
-fit <- fitqtl(cross, pheno.col = 9, qtl = mqtl, method = "hk", model = "normal",
-              formula = attributes(test)$formula, get.ests = T)
-summary(fit)
-
-
-
-?stepwiseqtl
-
-
-pens <- calc.penalties(out.2dim, alpha = 0.1)
-
-out.2dim <- scantwo(cross, method="hk", pheno.col = 8, n.perm = 1000, n.cluster = 4)
-
-
-
-
-
-QTLnames <- unlist(mqtl$altname)
-form <- paste(QTLnames, collapse="+")
-form <- paste("y~",form, sep="")
+  mqtl <- makeqtl(cross,res2[,1], res2[,2], what="prob")
+  QTLnames <- unlist(mqtl$altname)
+  form <- paste(QTLnames, collapse="+")
+  form <- paste("y~",form, sep="")
+  fit <- fitqtl(cross, pheno.col = 19, qtl = mqtl, method = "hk", model = "normal",
+                formula = form, get.ests = T)
+  fit %>% summary
+  
+  
+  
+  
+  
