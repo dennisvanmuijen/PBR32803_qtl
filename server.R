@@ -205,7 +205,6 @@ CIMapping <- reactive({
     mylist[[2]] <- thrs
     mylist[[3]] <- "No QTL detected"
     mylist[[4]] <- out.s1
-    mylist[[5]] <- eff.plot
   }
   return(mylist)
 })
