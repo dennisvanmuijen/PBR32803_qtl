@@ -165,7 +165,13 @@ CIMapping <- reactive({
   # QTL detect at alpha = 0.05
   res <- summary(out.s1, perms=out.s1perm, alpha=0.05)
   ## Cim using n.covar = result IM + 2
-  out.s2 <- cim(cross, pheno.col = input$phenosel2, method = "hk", n.marcovar = dim(res)[1] + 2)
+  if(dim(res)[1] == 0){
+    n.mcovar <- 1 
+  }
+  if(dim(res)[1] != 0){
+    n.mcovar <- dim(res)[1] 
+  }
+  out.s2 <- cim(cross, pheno.col = input$phenosel2, method = "hk", n.marcovar = n.mcovar)
   # out.s2 <-  stepwiseqtl(cross, pheno.col = input$phenosel2, method = "hk", penalties = summary(out.s1perm, alpha = 0.05)[1], 
   #                        max.qtl = 7, additive.only = T, keeplodprofile = TRUE)
   
@@ -199,6 +205,7 @@ CIMapping <- reactive({
     mylist[[2]] <- thrs
     mylist[[3]] <- "No QTL detected"
     mylist[[4]] <- out.s1
+    mylist[[5]] <- eff.plot
   }
   return(mylist)
 })
@@ -225,9 +232,10 @@ output$distPlot <- renderggiraph({
   plotdata$tooltip <- row.names(plotdata)
   thr <- IMapping()[[2]]
   plotdata$marker <- row.names(IMapping()[[1]])
-     p <- ggplot(plotdata[which(plotdata$chr%in%input$chromSelect),], aes(x=pos, y=lod, tooltip = tooltip, data_id = data_id))+
-       geom_line(aes(group = 1))+geom_rug(data = plotdata[which(!grepl("loc",plotdata$marker)),], sides = "b")+
-       facet_wrap(~chr, nrow=3, scales = "free_x")+
+  plotdata_set <- filter(plotdata, chr %in% input$chromSelect)
+     p <- ggplot(data = plotdata_set, aes(x=pos, y=lod, tooltip = tooltip, data_id = data_id))+
+      geom_line(aes(group = 1))+geom_rug(data = plotdata_set[which(!grepl("loc",plotdata_set$marker)),], sides = "b")+
+      facet_wrap(~chr, nrow=3, scales = "free_x")+
       geom_point_interactive(color="orange", size=0.1)+
       theme_dark() +
       geom_hline(yintercept = thr[1], lwd = 0.5, lty = 2, col = "white") +
@@ -258,10 +266,11 @@ output$distPlot2 <- renderggiraph({
   plotdata$tooltip <- row.names(plotdata)
   plotdata$marker <- row.names(plotdata)
   thr <- CIMapping()[[2]]
-  p <- ggplot(plotdata[which(plotdata$chr%in%input$chromSelect),], aes(x=pos, y=lod, colour = method, tooltip = tooltip, data_id = data_id, group = method))+
-    geom_line()+geom_rug(data = plotdata[which(!grepl("loc",plotdata$marker)),], sides = "b")+
+  plotdata_set <- filter(plotdata, chr %in% input$chromSelect2)
+  p <- ggplot(data = plotdata_set, aes(x=pos, y=lod, colour = method, tooltip = tooltip, data_id = data_id, group = method))+
+    geom_line()+geom_rug(data = plotdata_set[which(!grepl("loc",plotdata_set$marker)),], sides = "b")+
     facet_wrap(~chr, nrow=3, scales = "free_x")+
-    geom_point_interactive(color="black", size=0.05, alpha = 1)+
+    geom_point_interactive(color="black", size=0.1, alpha = 1)+
     theme_dark() +
     geom_hline(yintercept = thr[1], lwd = 0.5, lty = 2, col = "white") +
     geom_hline(yintercept = thr[2], lwd = 0.5, lty = 2, col = "orange") + 
