@@ -82,7 +82,7 @@ shinyServer(function(input, output, session) {
 ###### Interval mapping
 IMapping <- reactive({
   if(input$ngen > 5){
-  # cross <- geno() %>% convert2riself()
+  cross <- geno() %>% convert2riself()
     cross <- geno()
     cross <- cross %>% jittermap()
   cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
@@ -150,7 +150,7 @@ CIMapping <- reactive({
          )
   )
   if(input$ngen > 5){
-    # cross <- geno() %>% convert2riself()
+    cross <- geno() %>% convert2riself()
     cross <- geno()
     cross <- cross %>% jittermap()
     cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
