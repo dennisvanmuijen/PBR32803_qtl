@@ -83,8 +83,7 @@ shinyServer(function(input, output, session) {
 IMapping <- reactive({
   if(input$ngen > 5){
   cross <- geno() %>% convert2riself()
-    cross <- geno()
-    cross <- cross %>% jittermap()
+  cross <- cross %>% jittermap()
   cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
   } else {
     cross <- geno()
