@@ -83,8 +83,7 @@ shinyServer(function(input, output, session) {
 IMapping <- reactive({
   if(input$ngen > 5){
   cross <- geno() %>% convert2riself()
-    cross <- geno()
-    cross <- cross %>% jittermap()
+  cross <- cross %>% jittermap()
   cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
   } else {
     cross <- geno()
@@ -148,9 +147,8 @@ CIMapping <- reactive({
     need(input$file1 != "", "Upload a cross file to begin")
     )
 
-  if(input$ngen > 5){
+  if(input$ngen2 > 5){
     cross <- geno() %>% convert2riself()
-    cross <- geno()
     cross <- cross %>% jittermap()
     cross <- calc.genoprob(cross, step = 5, map.function = "kosambi")
   } else {
