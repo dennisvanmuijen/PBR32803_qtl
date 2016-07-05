@@ -127,28 +127,27 @@ output$IMsummary <- renderPrint({
    IMapping()[[3]]
   })
 
-waitlist <- reactive({
-  vals <- c("Counting backwards from infinity",
-                "So, do you come here often?",
-                "Just stalling to simulate activity...",
-                "Waiting for approval from Bill Gates...",
-                "Transporting you into the future one second at a time...",
-                "About your data... I lost it... in a volcano.",
-                "Loading the enchanted bunny...",
-                "Please be patient. The program should finish loading in six to eight weeks.")
-  indexnr <- runif(8,1,9) %>% trunc()
-  vals[indexnr[1]]
-})
+# waitlist <- reactive({
+#   vals <- c("Counting backwards from infinity",
+#                 "So, do you come here often?",
+#                 "Just stalling to simulate activity...",
+#                 "Waiting for approval from Bill Gates...",
+#                 "Transporting you into the future one second at a time...",
+#                 "About your data... I lost it... in a volcano.",
+#                 "Loading the enchanted bunny...",
+#                 "Please be patient. The program should finish loading in six to eight weeks.")
+#   indexnr <- runif(8,1,9) %>% trunc()
+#   vals[indexnr[1]]
+# })
 
 ###############################
 ###### Composite Interval mapping
 ############################
 CIMapping <- reactive({
   validate(
-    need(input$file1 != "", "Upload a cross file to begin"),
-    need(input$phenosel2 != "", waitlist()
-         )
-  )
+    need(input$file1 != "", "Upload a cross file to begin")
+    )
+
   if(input$ngen > 5){
     cross <- geno() %>% convert2riself()
     cross <- geno()
