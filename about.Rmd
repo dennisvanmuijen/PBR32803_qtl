@@ -13,4 +13,4 @@ output:
 **Platform**: R Shiny               
 
 **Usage**:
-This tool is a web-browser based shiny application for interactive qtl analysis. Functions of the qtl package qtl. Visualisations are made with ggplot and ggiraph. Several toy datasets and the analysis of the RIL population for the distance learning module is supported.
+This shiny app provides means for interactive qtl analysis. Functions of the qtl package are used in conjunction with visualisations in ggplot and ggiraph. Several toy datasets and the analysis of the RIL population for the distance learning module are supported.
