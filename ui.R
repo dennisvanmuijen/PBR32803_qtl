@@ -26,7 +26,7 @@ shinyUI(
              ),
             mainPanel(
               tabPanel("Interval mapping",
-                  tabsetPanel("IM",
+                  tabsetPanel(id = "IM",
                         tabPanel("Input summary",
                           verbatimTextOutput(outputId = "inputSummary")
                           ),
@@ -55,7 +55,7 @@ shinyUI(
                ),
                mainPanel(
                  tabPanel("Composite interval mapping",
-                          tabsetPanel("CIM",
+                          tabsetPanel(id = "CIM",
                                       tabPanel("LOD Profile CIM",
                                                helpText("Composite Interval mapping - white dashed = 5% signficance level, orange dashed = 1% significance level"),
                                                verbatimTextOutput(outputId = "lodthr2"),
